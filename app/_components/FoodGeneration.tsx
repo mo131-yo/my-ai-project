@@ -26,15 +26,57 @@ export const FoodGeneration = () => {
     setResultImage(null);
     setExtractedInfo([]);
 
-    try {
-    } catch (error) {
-      console.error("Error:", error);
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //   try {
+      
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //     setError("Something went wrong. Please try again.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
+  try {
+    // 1. Image API болон Extract API-г зэрэг дуудах
+    const [imageRes, extractRes] = await Promise.all([
+      fetch("/api/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      }),
+      fetch("/api/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      }),
+    ]);
+
+    const imageData = await imageRes.json();
+    const extractData = await extractRes.json();
+
+    // 2. Зургийн үр дүнг шалгах
+    if (imageData.url) {
+      setResultImage(imageData.url);
+    } else {
+      console.error("Image error:", imageData.error);
+    }
+
+    // 3. Орц ялгасан үр дүнг шалгах
+    if (extractData.ingredients) {
+      setExtractedInfo(extractData.ingredients);
+    }
+
+    if (!imageData.url && !extractData.ingredients) {
+      throw new Error("Both services failed");
+    }
+
+  } catch (error) {
+    console.error("Error:", error);
+    setError("Something went wrong. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
   return (
     <main className="container max-w-3xl p-4 mx-auto">
       <h1 className="mb-6 text-2xl font-bold">AI Food Creator</h1>
@@ -44,7 +86,7 @@ export const FoodGeneration = () => {
           placeholder="Enter a food description (e.g., 'Try our new spicy chicken ramen...')"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          className="min-h-[120px]"
+          className="min-h-30"
         />
 
         <Button onClick={generateImageAndExtract} disabled={isLoading || !prompt.trim()} className="w-full" variant={isLoading ? "secondary" : "outline"}>

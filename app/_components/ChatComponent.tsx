@@ -1,18 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
-import { MessageCircle, X, Send } from "lucide-react";
-import OpenAI from "openai";
+import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-  dangerouslyAllowBrowser: true,
-});
 
 export const ChatComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,10 +17,8 @@ export const ChatComponent = () => {
   const toggleChat = () => setIsOpen(!isOpen);
 
   useEffect(() => {
-    // Scroll to bottom on new message
-    const current = chatContainerRef.current as any;
-    if (current) {
-      current.scrollTop = current.scrollHeight;
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -36,20 +27,32 @@ export const ChatComponent = () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    const updatedMessages = [...messages, { role: "user" as const, content: userMessage }];
-    setMessages(updatedMessages);
+    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setInput("");
     setIsLoading(true);
 
     try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        body: JSON.stringify({ prompt: userMessage })
+      });
+
+      const result = await response.json();
+
+      if (result.output) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: result.output }
+        ]);
+      } else {
+        throw new Error(result.error || "Хариу ирсэнгүй");
+      }
+
     } catch (err) {
       console.error("OpenAI API Error:", err);
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "Something went wrong. Please try again.",
-        },
+        { role: "assistant", content: "Уучлаарай, алдаа гарлаа. Дахин оролдоно уу." }
       ]);
     } finally {
       setIsLoading(false);
@@ -101,4 +104,4 @@ export const ChatComponent = () => {
       )}
     </div>
   );
-};
+}

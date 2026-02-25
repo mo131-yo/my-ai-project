@@ -52,7 +52,7 @@ export function CaptureImage() {
           setImage(e.target.result as string);
           setCaption(null);
         }
-      };
+      };  
       reader.readAsDataURL(file);
     }
   };
@@ -63,15 +63,54 @@ export function CaptureImage() {
     setIsLoading(true);
     setCaption(null);
 
-    try {
-      const base64Image = image.split(",")[1];
-    } catch (error) {
-      console.error(error);
-      setCaption("An error occurred.");
-    } finally {
-      setIsLoading(false);
+  //   try {
+  //     const response = await fetch("/api/ingredients", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ 
+  //       imageUrl: image, 
+  //       prompt: "Энэ зураг дээр юу байгааг товч бөгөөд тодорхой тайлбарлаж өгнө үү." 
+  //     }),
+  //   });
+
+  //   const result = await response.json();
+
+  //     const base64Image = image.split(",")[1];
+  //   } catch (error) {
+  //     console.error(error);
+  //     setCaption("An error occurred.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+
+  try {
+    // 1. fetch хаягийг /api/analysis болгож засах
+    const response = await fetch("/api/analysis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        imageUrl: image, 
+      }),
+    });
+
+    const result = await response.json();
+
+    // 2. Ирсэн хариуг caption state-д хадгалах
+    if (result.output) {
+      setCaption(result.output);
+    } else {
+      setCaption("Тайлбар үүсгэж чадсангүй.");
     }
-  };
+
+  } catch (error) {
+    console.error(error);
+    setCaption("Холболтын алдаа гарлаа.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
