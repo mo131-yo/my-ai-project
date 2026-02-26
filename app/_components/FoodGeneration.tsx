@@ -15,51 +15,29 @@ export const FoodGeneration = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const generateImageAndExtract = async () => {
-    if (!prompt.trim()) {
-      setError("Please enter a prompt first");
-      return;
-    }
 
-    setIsLoading(true);
-    setError(null);
-    setResultImage(null);
-    setExtractedInfo([]);
+const generateImageAndExtract = async () => {
+  setIsLoading(true);
+  setError(null);
 
   try {
-    const [imageRes, extractRes] = await Promise.all([
-      fetch("/api/extract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      }),
-      fetch("/api/extract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      }),
-    ]);
+    const imgRes = await fetch("/api/generation", {
+      method: "POST",
+      body: JSON.stringify({ prompt }),
+    });
+    const imgData = await imgRes.json();
+    if (!imgData.url) throw new Error(imgData.error);
+    setResultImage(imgData.url);
 
-    const imageData = await imageRes.json();
-    const extractData = await extractRes.json();
+    const extRes = await fetch("/api/extract", {
+      method: "POST",
+      body: JSON.stringify({ imageUrl: imgData.url }),
+    });
+    const extData = await extRes.json();
+    setExtractedInfo(extData.ingredients);
 
-    if (imageData.url) {
-      setResultImage(imageData.url);
-    } else {
-      console.error("Image error:", imageData.error);
-    }
-
-    if (extractData.ingredients) {
-      setExtractedInfo(extractData.ingredients);
-    }
-
-    if (!imageData.url && !extractData.ingredients) {
-      throw new Error("Both services failed");
-    }
-
-  } catch (error) {
-    console.error("Error:", error);
-    setError("Something went wrong. Please try again.");
+  } catch (err: any) {
+    setError(err.message);
   } finally {
     setIsLoading(false);
   }
