@@ -26,18 +26,7 @@ export const FoodGeneration = () => {
     setResultImage(null);
     setExtractedInfo([]);
 
-  //   try {
-      
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //     setError("Something went wrong. Please try again.");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   try {
-    // 1. Image API болон Extract API-г зэрэг дуудах
     const [imageRes, extractRes] = await Promise.all([
       fetch("/api/extract", {
         method: "POST",
@@ -54,14 +43,12 @@ export const FoodGeneration = () => {
     const imageData = await imageRes.json();
     const extractData = await extractRes.json();
 
-    // 2. Зургийн үр дүнг шалгах
     if (imageData.url) {
       setResultImage(imageData.url);
     } else {
       console.error("Image error:", imageData.error);
     }
 
-    // 3. Орц ялгасан үр дүнг шалгах
     if (extractData.ingredients) {
       setExtractedInfo(extractData.ingredients);
     }
