@@ -45,14 +45,14 @@ export const ChatComponent = () => {
           { role: "assistant", content: result.output }
         ]);
       } else {
-        throw new Error(result.error || "Хариу ирсэнгүй");
+        throw new Error(result.error || "Hariu irsengui");
       }
 
     } catch (err) {
       console.error("OpenAI API Error:", err);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Уучлаарай, алдаа гарлаа. Дахин оролдоно уу." }
+        { role: "assistant", content: "Sorry aldaa garlaa dahin oroldono uu" }
       ]);
     } finally {
       setIsLoading(false);

@@ -77,12 +77,12 @@ export function CaptureImage() {
     if (result.output) {
       setCaption(result.output);
     } else {
-      setCaption("Тайлбар үүсгэж чадсангүй.");
+      setCaption("Tailbar uusgej chadsngui.");
     }
 
   } catch (error) {
     console.error(error);
-    setCaption("Холболтын алдаа гарлаа.");
+    setCaption("Holboltiin aldaa garlaa");
   } finally {
     setIsLoading(false);
   }

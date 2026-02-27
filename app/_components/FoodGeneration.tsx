@@ -75,12 +75,18 @@ const generateImageAndExtract = async () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {extractedInfo && (
-                <div className="flex flex-wrap items-center gap-2 p-4 border rounded-lg card">
-                  <h2 className="mb-2 text-lg font-semibold">Extracted Info</h2>
-                  {extractedInfo}
-                </div>
-              )}
+                {extractedInfo && extractedInfo.length > 0 && (
+                  <div className="p-4">
+                    <h2 className="mb-3 text-lg font-semibold">Extracted Info</h2>
+                    <div className="flex flex-wrap gap-2">
+                      {extractedInfo.map((ingredient, index) => (
+                          <div key={index}>
+                            {ingredient}  
+                          </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               {resultImage && (
                 <div className="mb-6 overflow-hidden border rounded-lg">
                   <img src={resultImage || "/placeholder.svg"} alt="Generated image" className="w-full h-auto" />
